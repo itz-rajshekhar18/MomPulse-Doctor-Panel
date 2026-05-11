@@ -1,0 +1,310 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user owns the document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && (request.auth.token.email == 'admin@admin.com' || request.auth.token.email == 'admin@mompulse.com');
+    }
+
+    // Helper function to check if user is a doctor
+    function isDoctor() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/doctorPanel/doctors/$(request.auth.uid));
+    }
+
+    // Helper function to get doctor data
+    function getDoctorData() {
+      return get(/databases/$(database)/documents/doctorPanel/doctors/$(request.auth.uid)).data;
+    }
+
+    // Users collection - users can only read/write their own data, admins can read all
+    match /users/{userId} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Users can read/write their own data
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // User profiles subcollection
+    match /users/{userId}/profile/{document=**} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Onboarding data subcollection
+    match /users/{userId}/onboarding/{document=**} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Tracking data subcollection (pregnancy, period, etc.)
+    match /users/{userId}/tracking/{document=**} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // AI conversations subcollection - users can only access their own conversations
+    match /users/{userId}/conversations/{conversationId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && isOwner(userId);
+      allow delete: if isAuthenticated() && isOwner(userId);
+
+      // Messages within conversations
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated() && isOwner(userId);
+        allow update: if isAuthenticated() && isOwner(userId);
+        allow delete: if isAuthenticated() && isOwner(userId);
+      }
+    }
+
+    // Period cycles subcollection - users can only access their own cycle data
+    match /users/{userId}/cycles/{cycleId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && isOwner(userId);
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Period predictions subcollection - users can only access their own predictions
+    match /users/{userId}/predictions/{document=**} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Recovery logs subcollection - users can only access their own recovery data
+    match /users/{userId}/recoveryLogs/{logId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && isOwner(userId);
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Postpartum data subcollection - users can only access their own postpartum data
+    match /users/{userId}/postpartum/{document=**} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Community posts - categorized by section type
+    // Sections: 'period', 'pre-pregnancy', 'postpartum', 'general'
+    match /community/{section}/posts/{postId} {
+      // Helper function to validate section type
+      function isValidSection() {
+        return section == 'period' || section == 'pre-pregnancy' || section == 'postpartum' || section == 'general';
+      }
+
+      // Helper function to validate post data
+      function isValidPost() {
+        return request.resource.data.keys().hasAll(['userId', 'userName', 'content', 'section', 'createdAt']) &&
+          request.resource.data.userId == request.auth.uid &&
+          request.resource.data.section == section &&
+          request.resource.data.content is string &&
+          request.resource.data.content.size() > 0 &&
+          request.resource.data.content.size() <= 5000;
+      }
+
+      // All authenticated users can read posts in any section
+      allow read: if isAuthenticated() && isValidSection();
+      // Authenticated users can create posts with valid data
+      allow create: if isAuthenticated() && isValidSection() && isValidPost();
+      // Only post owner can update or delete their posts
+      allow update, delete: if isAuthenticated() && isValidSection() && resource.data.userId == request.auth.uid;
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        // Helper function to validate comment data
+        function isValidComment() {
+          return request.resource.data.keys().hasAll(['userId', 'userName', 'content', 'createdAt']) &&
+            request.resource.data.userId == request.auth.uid &&
+            request.resource.data.content is string &&
+            request.resource.data.content.size() > 0 &&
+            request.resource.data.content.size() <= 2000;
+        }
+
+        // All authenticated users can read comments
+        allow read: if isAuthenticated();
+        // Authenticated users can create comments with valid data
+        allow create: if isAuthenticated() && isValidComment();
+        // Only comment owner can update or delete their comments
+        allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      }
+
+      // Likes subcollection
+      match /likes/{likeId} {
+        // All authenticated users can read likes
+        allow read: if isAuthenticated();
+        // Users can only create/delete their own likes
+        allow create, delete: if isAuthenticated() && request.auth.uid == likeId;
+      }
+    }
+
+    // Community topics/categories metadata
+    match /community/{section}/topics/{topicId} {
+      // All authenticated users can read topics
+      allow read: if isAuthenticated();
+      // Only admins can write topics (for now, no one can write)
+      allow write: if false;
+    }
+
+    // User community profiles (reputation, badges, etc.)
+    match /communityProfiles/{userId} {
+      // All authenticated users can read community profiles
+      allow read: if isAuthenticated();
+      // Users can only update their own community profile
+      allow create, update: if isAuthenticated() && isOwner(userId);
+      // Users can delete their own community profile
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Content Management - Articles, Videos, and Doctors
+    match /content/{contentType}/items/{itemId} {
+      // All authenticated users can read content
+      allow read: if isAuthenticated();
+      // Admins have full write access
+      allow write: if isAdmin();
+    }
+
+    // Sessions collection - for group sessions/workshops
+    match /content/sessions/items/{sessionId} {
+      // All authenticated users can read sessions
+      allow read: if isAuthenticated();
+      // Admins have full write access
+      allow write: if isAdmin();
+    }
+
+    // Top-level Doctors collection (for consultation page)
+    match /doctors/{doctorId} {
+      // All authenticated users can read doctors
+      allow read: if isAuthenticated();
+      // Admins have full write access
+      allow write: if isAdmin();
+    }
+
+    // Top-level Sessions collection (for consultation page)
+    match /sessions/{sessionId} {
+      // All authenticated users can read sessions
+      allow read: if isAuthenticated();
+      // Admins have full write access
+      allow write: if isAdmin();
+    }
+
+    // Bookings collection
+    match /bookings/{bookingId} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Users can read their own bookings
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // Users can create their own bookings
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      // Users can update their own bookings
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Analytics collection - admin only
+    match /analytics/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // ========================================
+    // DOCTOR PANEL COLLECTIONS
+    // ========================================
+
+    // Doctor Panel - Doctors collection
+    match /doctorPanel/doctors/{doctorId} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Doctors can read and write their own profile
+      allow read, write: if isAuthenticated() && request.auth.uid == doctorId;
+      // Allow doctors to create their own profile after authentication
+      allow create: if isAuthenticated() && request.auth.uid == doctorId && request.resource.data.email == request.auth.token.email;
+    }
+
+    // Doctor Panel - Patients collection
+    match /doctorPanel/patients/{patientId} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Doctors can read and write patients assigned to them
+      allow read, write: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/doctorPanel/doctors/$(resource.data.doctorId)) &&
+        resource.data.doctorId == request.auth.uid;
+      // Doctors can create patients and assign them to themselves
+      allow create: if isAuthenticated() && 
+        request.resource.data.doctorId == request.auth.uid &&
+        exists(/databases/$(database)/documents/doctorPanel/doctors/$(request.auth.uid));
+    }
+
+    // Doctor Panel - Appointments collection
+    match /doctorPanel/appointments/{appointmentId} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Doctors can read and write appointments for their patients
+      allow read, write: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/doctorPanel/doctors/$(resource.data.doctorId)) &&
+        resource.data.doctorId == request.auth.uid;
+      // Doctors can create appointments for their patients
+      allow create: if isAuthenticated() && 
+        request.resource.data.doctorId == request.auth.uid &&
+        exists(/databases/$(database)/documents/doctorPanel/doctors/$(request.auth.uid));
+    }
+
+    // Doctor Panel - Medical Records subcollection
+    match /doctorPanel/patients/{patientId}/medicalRecords/{recordId} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Doctors can access medical records of their patients
+      allow read, write: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/doctorPanel/patients/$(patientId)) &&
+        get(/databases/$(database)/documents/doctorPanel/patients/$(patientId)).data.doctorId == request.auth.uid;
+    }
+
+    // Doctor Panel - Prescriptions subcollection
+    match /doctorPanel/patients/{patientId}/prescriptions/{prescriptionId} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Doctors can access prescriptions of their patients
+      allow read, write: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/doctorPanel/patients/$(patientId)) &&
+        get(/databases/$(database)/documents/doctorPanel/patients/$(patientId)).data.doctorId == request.auth.uid;
+    }
+
+    // Doctor Panel - Lab Results subcollection
+    match /doctorPanel/patients/{patientId}/labResults/{resultId} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Doctors can access lab results of their patients
+      allow read, write: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/doctorPanel/patients/$(patientId)) &&
+        get(/databases/$(database)/documents/doctorPanel/patients/$(patientId)).data.doctorId == request.auth.uid;
+    }
+
+    // Doctor Panel - Analytics and Reports
+    match /doctorPanel/analytics/{doctorId}/{document=**} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Doctors can only access their own analytics
+      allow read, write: if isAuthenticated() && doctorId == request.auth.uid;
+    }
+
+    // Doctor Panel - Notifications
+    match /doctorPanel/notifications/{notificationId} {
+      // Admins have full access
+      allow read, write: if isAdmin();
+      // Doctors can read notifications addressed to them
+      allow read: if isAuthenticated() && resource.data.doctorId == request.auth.uid;
+      // Doctors can update notification status (mark as read)
+      allow update: if isAuthenticated() && resource.data.doctorId == request.auth.uid;
+    }
+
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
