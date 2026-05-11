@@ -1,0 +1,124 @@
+'use client';
+
+interface ArticleSubmission {
+  id: string;
+  title: string;
+  status: 'needs-review' | 'published' | 'rejected';
+  icon?: string;
+}
+
+interface ArticleSubmissionsProps {
+  articles: ArticleSubmission[];
+  onEdit: (id: string) => void;
+  onView: (id: string) => void;
+}
+
+export default function ArticleSubmissions({ articles, onEdit, onView }: ArticleSubmissionsProps) {
+  const defaultArticles: ArticleSubmission[] = [
+    {
+      id: '1',
+      title: 'Nutrition in Trimester 3',
+      status: 'needs-review',
+      icon: '🥗'
+    },
+    {
+      id: '2',
+      title: 'Sleep Training Guide',
+      status: 'published',
+      icon: '😴'
+    }
+  ];
+
+  const displayArticles = articles.length > 0 ? articles : defaultArticles;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'needs-review':
+        return 'bg-yellow-50 border-yellow-200';
+      case 'published':
+        return 'bg-green-50 border-green-200';
+      case 'rejected':
+        return 'bg-red-50 border-red-200';
+      default:
+        return 'bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'needs-review':
+        return 'Needs Review';
+      case 'published':
+        return 'Published';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return 'Unknown';
+    }
+  };
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'needs-review':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'published':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-gray-900 mb-6">Article Submissions</h3>
+
+      <div className="space-y-4">
+        {displayArticles.map((article) => (
+          <div
+            key={article.id}
+            className={`flex items-center justify-between p-4 rounded-xl border-2 transition-colors ${getStatusColor(article.status)}`}
+          >
+            <div className="flex items-center gap-4 flex-1">
+              <div className="text-2xl">{article.icon || '📄'}</div>
+
+              <div className="flex-1">
+                <h4 className="font-semibold text-gray-900">{article.title}</h4>
+                <p className="text-sm text-gray-600">
+                  Status: <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(article.status)}`}>
+                    {getStatusLabel(article.status)}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {article.status === 'needs-review' && (
+                <button
+                  onClick={() => onEdit(article.id)}
+                  className="px-3 py-1 text-purple-600 hover:bg-purple-50 rounded-lg text-sm font-medium transition-colors"
+                >
+                  EDIT
+                </button>
+              )}
+
+              {article.status === 'published' && (
+                <button
+                  onClick={() => onView(article.id)}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  title="View"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
