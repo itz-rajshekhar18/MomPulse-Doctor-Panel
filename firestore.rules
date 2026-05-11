@@ -18,12 +18,12 @@ service cloud.firestore {
 
     // Helper function to check if user is a doctor
     function isDoctor() {
-      return isAuthenticated() && exists(/databases/$(database)/documents/doctorPanel/doctors/$(request.auth.uid));
+      return isAuthenticated() && exists(/databases/$(database)/documents/doctors/$(request.auth.uid));
     }
 
     // Helper function to get doctor data
     function getDoctorData() {
-      return get(/databases/$(database)/documents/doctorPanel/doctors/$(request.auth.uid)).data;
+      return get(/databases/$(database)/documents/doctors/$(request.auth.uid)).data;
     }
 
     // Users collection - users can only read/write their own data, admins can read all
@@ -217,7 +217,7 @@ service cloud.firestore {
     // ========================================
 
     // Doctor Panel - Doctors collection
-    match /doctorPanel/doctors/{doctorId} {
+    match /doctors/{doctorId} {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can read and write their own profile
@@ -227,65 +227,65 @@ service cloud.firestore {
     }
 
     // Doctor Panel - Patients collection
-    match /doctorPanel/patients/{patientId} {
+    match /patients/{patientId} {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can read and write patients assigned to them
       allow read, write: if isAuthenticated() && 
-        exists(/databases/$(database)/documents/doctorPanel/doctors/$(resource.data.doctorId)) &&
+        exists(/databases/$(database)/documents/doctors/$(resource.data.doctorId)) &&
         resource.data.doctorId == request.auth.uid;
       // Doctors can create patients and assign them to themselves
       allow create: if isAuthenticated() && 
         request.resource.data.doctorId == request.auth.uid &&
-        exists(/databases/$(database)/documents/doctorPanel/doctors/$(request.auth.uid));
+        exists(/databases/$(database)/documents/doctors/$(request.auth.uid));
     }
 
     // Doctor Panel - Appointments collection
-    match /doctorPanel/appointments/{appointmentId} {
+    match /appointments/{appointmentId} {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can read and write appointments for their patients
       allow read, write: if isAuthenticated() && 
-        exists(/databases/$(database)/documents/doctorPanel/doctors/$(resource.data.doctorId)) &&
+        exists(/databases/$(database)/documents/doctors/$(resource.data.doctorId)) &&
         resource.data.doctorId == request.auth.uid;
       // Doctors can create appointments for their patients
       allow create: if isAuthenticated() && 
         request.resource.data.doctorId == request.auth.uid &&
-        exists(/databases/$(database)/documents/doctorPanel/doctors/$(request.auth.uid));
+        exists(/databases/$(database)/documents/doctors/$(request.auth.uid));
     }
 
     // Doctor Panel - Medical Records subcollection
-    match /doctorPanel/patients/{patientId}/medicalRecords/{recordId} {
+    match /patients/{patientId}/medicalRecords/{recordId} {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can access medical records of their patients
       allow read, write: if isAuthenticated() && 
-        exists(/databases/$(database)/documents/doctorPanel/patients/$(patientId)) &&
-        get(/databases/$(database)/documents/doctorPanel/patients/$(patientId)).data.doctorId == request.auth.uid;
+        exists(/databases/$(database)/documents/patients/$(patientId)) &&
+        get(/databases/$(database)/documents/patients/$(patientId)).data.doctorId == request.auth.uid;
     }
 
     // Doctor Panel - Prescriptions subcollection
-    match /doctorPanel/patients/{patientId}/prescriptions/{prescriptionId} {
+    match /patients/{patientId}/prescriptions/{prescriptionId} {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can access prescriptions of their patients
       allow read, write: if isAuthenticated() && 
-        exists(/databases/$(database)/documents/doctorPanel/patients/$(patientId)) &&
-        get(/databases/$(database)/documents/doctorPanel/patients/$(patientId)).data.doctorId == request.auth.uid;
+        exists(/databases/$(database)/documents/patients/$(patientId)) &&
+        get(/databases/$(database)/documents/patients/$(patientId)).data.doctorId == request.auth.uid;
     }
 
     // Doctor Panel - Lab Results subcollection
-    match /doctorPanel/patients/{patientId}/labResults/{resultId} {
+    match /patients/{patientId}/labResults/{resultId} {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can access lab results of their patients
       allow read, write: if isAuthenticated() && 
-        exists(/databases/$(database)/documents/doctorPanel/patients/$(patientId)) &&
-        get(/databases/$(database)/documents/doctorPanel/patients/$(patientId)).data.doctorId == request.auth.uid;
+        exists(/databases/$(database)/documents/patients/$(patientId)) &&
+        get(/databases/$(database)/documents/patients/$(patientId)).data.doctorId == request.auth.uid;
     }
 
     // Doctor Panel - Analytics and Reports
-    match /doctorPanel/analytics/{doctorId}/{document=**} {
+    match /analytics/{doctorId}/{document=**} {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can only access their own analytics
@@ -293,7 +293,7 @@ service cloud.firestore {
     }
 
     // Doctor Panel - Notifications
-    match /doctorPanel/notifications/{notificationId} {
+    match /notifications/{notificationId} {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can read notifications addressed to them

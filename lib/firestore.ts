@@ -50,10 +50,11 @@ export interface Appointment {
   updatedAt: Timestamp;
 }
 
-// Collection references using the new structure
-const DOCTORS_COLLECTION = 'doctorPanel/doctors';
-const PATIENTS_COLLECTION = 'doctorPanel/patients';
-const APPOINTMENTS_COLLECTION = 'doctorPanel/appointments';
+// Collection references - using correct Firestore path structure
+// Firestore requires odd number of segments: collection/doc/collection/doc...
+const DOCTORS_COLLECTION = 'doctors';
+const PATIENTS_COLLECTION = 'patients';
+const APPOINTMENTS_COLLECTION = 'appointments';
 
 // Doctor operations
 export const getDoctorByEmail = async (email: string): Promise<Doctor | null> => {

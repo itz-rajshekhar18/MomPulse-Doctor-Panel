@@ -54,7 +54,7 @@ async function seedData() {
     };
 
     // Use setDoc with the user's UID as the document ID
-    const doctorRef = doc(db, 'doctorPanel/doctors', doctorUid);
+    const doctorRef = doc(db, 'doctors', doctorUid);
     await setDoc(doctorRef, doctorData);
     console.log('Created doctor document:', doctorUid);
 
@@ -94,7 +94,7 @@ async function seedData() {
 
     const patientIds: string[] = [];
     for (const patient of patients) {
-      const patientRef = await addDoc(collection(db, 'doctorPanel/patients'), patient);
+      const patientRef = await addDoc(collection(db, 'patients'), patient);
       patientIds.push(patientRef.id);
       console.log(`Created patient: ${patient.name} (${patientRef.id})`);
     }
@@ -134,7 +134,7 @@ async function seedData() {
     ];
 
     for (const appointment of appointments) {
-      const appointmentRef = await addDoc(collection(db, 'doctorPanel/appointments'), appointment);
+      const appointmentRef = await addDoc(collection(db, 'appointments'), appointment);
       console.log(`Created appointment for ${appointment.patientName} (${appointmentRef.id})`);
     }
 
@@ -143,9 +143,9 @@ async function seedData() {
     console.log('Email:', doctorEmail);
     console.log('Password:', doctorPassword);
     console.log('\nFirestore Collections:');
-    console.log('- doctorPanel/doctors');
-    console.log('- doctorPanel/patients');
-    console.log('- doctorPanel/appointments');
+    console.log('- doctors');
+    console.log('- patients');
+    console.log('- appointments');
 
   } catch (error) {
     console.error('Error seeding data:', error);
