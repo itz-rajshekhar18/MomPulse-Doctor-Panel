@@ -92,7 +92,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user || !doctor) {
+  if (!user) {
     return null; // Will redirect to login
   }
 

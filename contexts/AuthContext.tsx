@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
 import { onAuthStateChange } from '@/lib/auth';
-import { Doctor, getDoctorByEmail } from '@/lib/firestore';
+import { Doctor, getDoctorByUid } from '@/lib/firestore';
 
 interface AuthContextType {
   user: User | null;
@@ -37,8 +37,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (user) {
         try {
-          // Get doctor data from Firestore
-          const doctorData = await getDoctorByEmail(user.email!);
+          // Fetch doctor profile by UID — matches Firestore security rules
+          const doctorData = await getDoctorByUid(user.uid);
           setDoctor(doctorData);
         } catch (error) {
           console.error('Error fetching doctor data:', error);

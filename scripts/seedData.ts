@@ -3,7 +3,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, Timestamp, doc, setDoc } from 'firebase/firestore';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDDv58ra_Q2qWhKtWupqL5IUB5Wxgnuxxk",
@@ -34,9 +34,11 @@ async function seedData() {
       console.log('Created doctor user:', doctorUid);
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
-        console.log('Doctor user already exists');
-        // For existing users, we'll use a placeholder UID
-        doctorUid = 'existing-doctor-uid';
+        console.log('Doctor user already exists, signing in to get UID...');
+        // Sign in to get the real UID instead of using a placeholder
+        const userCredential = await signInWithEmailAndPassword(auth, doctorEmail, doctorPassword);
+        doctorUid = userCredential.user.uid;
+        console.log('Got existing doctor UID:', doctorUid);
       } else {
         throw error;
       }
@@ -153,4 +155,4 @@ async function seedData() {
 }
 
 // Uncomment the line below to run the seeding
-// seedData();
+seedData();

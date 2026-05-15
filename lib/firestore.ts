@@ -74,6 +74,23 @@ export const getDoctorByEmail = async (email: string): Promise<Doctor | null> =>
   }
 };
 
+// Fetch doctor by their Firebase Auth UID (matches Firestore rules)
+export const getDoctorByUid = async (uid: string): Promise<Doctor | null> => {
+  try {
+    const docRef = doc(db, DOCTORS_COLLECTION, uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as Doctor;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('Error getting doctor by UID:', error);
+    throw error;
+  }
+};
+
 export const getDoctorById = async (doctorId: string): Promise<Doctor | null> => {
   try {
     const docRef = doc(db, DOCTORS_COLLECTION, doctorId);
