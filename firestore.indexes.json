@@ -1,103 +1,102 @@
 {
   "indexes": [
     {
-      "collectionGroup": "doctors",
+      "collectionGroup": "appointments",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "status",
+          "fieldPath": "doctorId",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "rating",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
+          "fieldPath": "appointmentDate",
           "order": "DESCENDING"
         }
-      ],
-      "density": "SPARSE_ALL"
+      ]
     },
     {
-      "collectionGroup": "items",
+      "collectionGroup": "appointments",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "section",
+          "fieldPath": "doctorId",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "status",
+          "fieldPath": "appointmentDate",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "patients",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "doctorId",
           "order": "ASCENDING"
         },
         {
           "fieldPath": "createdAt",
           "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "doctorSessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "doctorId",
+          "order": "ASCENDING"
         },
         {
-          "fieldPath": "__name__",
+          "fieldPath": "createdAt",
           "order": "DESCENDING"
         }
-      ],
-      "density": "SPARSE_ALL"
+      ]
     },
     {
-      "collectionGroup": "items",
+      "collectionGroup": "doctorSessions",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "status",
+          "fieldPath": "approvalStatus",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "updatedAt",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "ASCENDING"
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
         }
-      ],
-      "density": "SPARSE_ALL"
+      ]
     },
     {
-      "collectionGroup": "sessions",
+      "collectionGroup": "doctorContent",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "status",
+          "fieldPath": "doctorId",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "date",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "ASCENDING"
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
         }
-      ],
-      "density": "SPARSE_ALL"
+      ]
     },
     {
-      "collectionGroup": "sessions",
+      "collectionGroup": "doctorContent",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "status",
+          "fieldPath": "approvalStatus",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "updatedAt",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "ASCENDING"
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
         }
-      ],
-      "density": "SPARSE_ALL"
+      ]
     }
   ],
   "fieldOverrides": []
