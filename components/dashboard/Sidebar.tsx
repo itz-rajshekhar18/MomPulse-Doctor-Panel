@@ -70,8 +70,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
     { id: 'writer', label: 'Writer', href: '/dashboard/writer' },
     { id: 'sessions', label: 'Sessions', href: '/dashboard/sessions' },
     { id: 'patients', label: 'Patients', href: '/dashboard' },
-    { id: 'analytics', label: 'Analytics', href: '/dashboard' },
-    { id: 'settings', label: 'Settings', href: '/dashboard' },
+    { id: 'settings', label: 'Settings', href: '/dashboard/settings' },
   ];
 
   const handleNav = (item: { id: string; href: string }) => {
@@ -80,19 +79,19 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
   };
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
+    <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">M</span>
           </div>
-          <span className="text-gray-800 font-semibold text-lg">MomPulse</span>
+          <span className="text-gray-800 dark:text-gray-100 font-semibold text-lg">MomPulse</span>
         </div>
       </div>
 
       {/* User Profile */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
             <span className="text-white font-semibold text-lg">
@@ -100,10 +99,10 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
             </span>
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-gray-900">{doctor?.name || 'Doctor'}</h3>
-            <p className="text-sm text-gray-500">Head Administrator</p>
-            <span className="inline-block bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full mt-1">
-              PREMIUM ACCESS
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">{doctor?.name || 'Doctor'}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{doctor?.specialization || 'Specialist'}</p>
+            <span className="inline-block bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 text-xs px-2 py-1 rounded-full mt-1">
+              VERIFIED DOCTOR
             </span>
           </div>
         </div>
@@ -118,8 +117,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
                 onClick={() => handleNav(item)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
                   activeSection === item.id
-                    ? 'bg-purple-50 text-purple-700 border-r-2 border-purple-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-r-2 border-purple-700 dark:border-purple-500'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
                 }`}
               >
                 {icons[item.id]}
@@ -131,10 +130,10 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
       </nav>
 
       {/* Logout Button */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors"
         >
           {icons.logout}
           <span className="font-medium">Logout</span>

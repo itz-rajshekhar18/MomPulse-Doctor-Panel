@@ -31,13 +31,13 @@ export default function TodaysAppointments({ appointments, loading }: TodaysAppo
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="text-xl font-bold text-gray-900">Today's Appointments</h3>
-          <p className="text-gray-500">March 24, 2024</p>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Today's Appointments</h3>
+          <p className="text-gray-500 dark:text-gray-400">March 24, 2024</p>
         </div>
-        <button className="text-purple-600 hover:text-purple-700 font-medium">
+        <button className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
           View All
         </button>
       </div>
@@ -46,27 +46,27 @@ export default function TodaysAppointments({ appointments, loading }: TodaysAppo
         {loading ? (
           // Loading skeleton
           Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl animate-pulse">
-              <div className="w-16 h-12 bg-gray-200 rounded-lg"></div>
+            <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl animate-pulse">
+              <div className="w-16 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg"></div>
               <div className="flex-1">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
               </div>
-              <div className="w-20 h-6 bg-gray-200 rounded-full"></div>
+              <div className="w-20 h-6 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
             </div>
           ))
         ) : appointments.length > 0 ? (
           appointments.map((appointment) => (
-            <div key={appointment.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <div key={appointment.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
               <div className="text-center">
-                <div className="text-lg font-bold text-gray-900">
+                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
                   {formatTime(appointment.appointmentDate)}
                 </div>
               </div>
               
               <div className="flex-1">
-                <h4 className="font-semibold text-gray-900">{appointment.patientName}</h4>
-                <p className="text-sm text-gray-600">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100">{appointment.patientName}</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   {appointment.notes || 'General consultation'}
                 </p>
               </div>
@@ -84,7 +84,7 @@ export default function TodaysAppointments({ appointments, loading }: TodaysAppo
                   </button>
                 )}
 
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <button className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                   </svg>
@@ -94,10 +94,10 @@ export default function TodaysAppointments({ appointments, loading }: TodaysAppo
           ))
         ) : (
           <div className="text-center py-8">
-            <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a4 4 0 118 0v4m-4 8a2 2 0 100-4 2 2 0 000 4zm0 0v4m-4-8a2 2 0 100-4 2 2 0 000 4zm8 0a2 2 0 100-4 2 2 0 000 4z" />
             </svg>
-            <p className="text-gray-500">No appointments scheduled for today</p>
+            <p className="text-gray-500 dark:text-gray-400">No appointments scheduled for today</p>
           </div>
         )}
       </div>

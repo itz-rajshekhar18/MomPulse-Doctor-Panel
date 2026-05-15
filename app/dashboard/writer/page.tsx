@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar, TopBar } from '@/components/dashboard';
+import { createDoctorContent } from '@/lib/firestore';
 
 const CATEGORIES = [
   'Postnatal Care',
@@ -16,6 +17,8 @@ const CATEGORIES = [
 ];
 
 const CONTENT_TYPES = ['Article', 'Video'];
+
+type SubmitState = 'idle' | 'saving' | 'success' | 'error';
 
 export default function WriterPage() {
   const { user, doctor } = useAuth();
@@ -30,6 +33,35 @@ export default function WriterPage() {
   const [tagInput, setTagInput] = useState('');
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState('');
+  const [submitState, setSubmitState] = useState<SubmitState>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const validate = () => {
+    if (!title.trim()) return 'Title is required.';
+    if (!content.trim()) return 'Content is required.';
+    if (contentType === 'Video' && !videoUrl.trim()) return 'Video URL is required.';
+    return null;
+  };
+
+  const buildPayload = (status: 'draft' | 'pending_approval') => {
+    const payload: any = {
+      doctorId: user!.uid,
+      doctorName: doctor?.name ?? user!.email ?? 'Unknown Doctor',
+      contentType: contentType.toLowerCase() as 'article' | 'video',
+      title: title.trim(),
+      content: content.trim(),
+      category,
+      tags,
+      approvalStatus: status as const,
+    };
+
+    // Only add videoUrl if it's a video and has a value
+    if (contentType === 'Video' && videoUrl.trim()) {
+      payload.videoUrl = videoUrl.trim();
+    }
+
+    return payload;
+  };
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -48,15 +80,39 @@ export default function WriterPage() {
     }
   };
 
-  const handleSaveDraft = () => {
-    console.log('Saving draft...');
-    // TODO: Save to Firestore with status 'draft'
+  const handleSaveDraft = async () => {
+    const err = validate();
+    if (err) { setErrorMsg(err); return; }
+    setErrorMsg('');
+    setSubmitState('saving');
+    try {
+      await createDoctorContent(buildPayload('draft'));
+      setSubmitState('success');
+      setTimeout(() => router.push('/dashboard'), 1000);
+    } catch (error) {
+      console.error('Save draft error:', error);
+      setSubmitState('error');
+      setErrorMsg('Failed to save draft. Please try again.');
+    }
   };
 
-  const handlePublish = () => {
-    console.log('Publishing...');
-    // TODO: Save to Firestore with status 'pending_approval'
+  const handlePublish = async () => {
+    const err = validate();
+    if (err) { setErrorMsg(err); return; }
+    setErrorMsg('');
+    setSubmitState('saving');
+    try {
+      await createDoctorContent(buildPayload('pending_approval'));
+      setSubmitState('success');
+      setTimeout(() => router.push('/dashboard'), 1000);
+    } catch (error) {
+      console.error('Publish error:', error);
+      setSubmitState('error');
+      setErrorMsg('Failed to publish. Please try again.');
+    }
   };
+
+  const isBusy = submitState === 'saving';
 
   return (
     <div className="flex h-screen bg-[#f5f4f0]">
@@ -76,18 +132,46 @@ export default function WriterPage() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleSaveDraft}
-                  className="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                  disabled={isBusy}
+                  className="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
                 >
                   Save Draft
                 </button>
                 <button
                   onClick={handlePublish}
-                  className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+                  disabled={isBusy}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-60"
                 >
-                  Publish
+                  {isBusy && (
+                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                  )}
+                  {isBusy ? 'Publishing...' : 'Publish'}
                 </button>
               </div>
             </div>
+
+            {/* Success banner */}
+            {submitState === 'success' && (
+              <div className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-5 py-3 rounded-xl">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="font-medium">Content saved successfully! Redirecting…</span>
+              </div>
+            )}
+
+            {/* Error banner */}
+            {errorMsg && (
+              <div className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-5 py-3 rounded-xl">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-medium">{errorMsg}</span>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Editor */}
@@ -127,7 +211,7 @@ export default function WriterPage() {
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
-                      <span>Dr. {doctor?.name || 'Sarah Chen'}</span>
+                      <span>Dr. {doctor?.name || 'Doctor'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

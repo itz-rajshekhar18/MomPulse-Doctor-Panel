@@ -30,10 +30,10 @@ export default function UpcomingWorkshops({ workshops }: UpcomingWorkshopsProps)
   const displayWorkshops = workshops.length > 0 ? workshops : defaultWorkshops;
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Workshops</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Upcoming Workshops</h3>
       
-      <p className="text-gray-600 mb-6">
+      <p className="text-gray-600 dark:text-gray-400 mb-6">
         You have 2 group wellness sessions scheduled for this weekend. 45 moms have already registered.
       </p>
 
@@ -43,15 +43,15 @@ export default function UpcomingWorkshops({ workshops }: UpcomingWorkshopsProps)
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full border-2 border-white flex items-center justify-center"
+              className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center"
             >
               <span className="text-white text-xs font-semibold">
                 {String.fromCharCode(65 + index)}
               </span>
             </div>
           ))}
-          <div className="w-8 h-8 bg-gray-200 rounded-full border-2 border-white flex items-center justify-center">
-            <span className="text-gray-600 text-xs font-semibold">+42</span>
+          <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center">
+            <span className="text-gray-600 dark:text-gray-300 text-xs font-semibold">+42</span>
           </div>
         </div>
       </div>

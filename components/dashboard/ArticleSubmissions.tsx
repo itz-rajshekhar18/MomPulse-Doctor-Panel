@@ -71,8 +71,8 @@ export default function ArticleSubmissions({ articles, onEdit, onView }: Article
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">Article Submissions</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Article Submissions</h3>
 
       <div className="space-y-4">
         {displayArticles.map((article) => (
@@ -86,8 +86,8 @@ export default function ArticleSubmissions({ articles, onEdit, onView }: Article
               </div>
 
               <div className="flex-1">
-                <h4 className="font-semibold text-gray-900">{article.title}</h4>
-                <p className="text-sm text-gray-600">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100">{article.title}</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Status:{' '}
                   <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(article.status)}`}>
                     {getStatusLabel(article.status)}
@@ -100,7 +100,7 @@ export default function ArticleSubmissions({ articles, onEdit, onView }: Article
               {article.status === 'needs-review' && (
                 <button
                   onClick={() => onEdit(article.id)}
-                  className="px-3 py-1 text-purple-600 hover:bg-purple-50 rounded-lg text-sm font-medium transition-colors"
+                  className="px-3 py-1 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg text-sm font-medium transition-colors"
                 >
                   EDIT
                 </button>
@@ -109,7 +109,7 @@ export default function ArticleSubmissions({ articles, onEdit, onView }: Article
               {article.status === 'published' && (
                 <button
                   onClick={() => onView(article.id)}
-                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   title="View"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>

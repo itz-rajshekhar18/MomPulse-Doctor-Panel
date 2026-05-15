@@ -56,6 +56,7 @@ const DOCTORS_COLLECTION = 'doctors';
 const PATIENTS_COLLECTION = 'patients';
 const APPOINTMENTS_COLLECTION = 'appointments';
 const DOCTOR_SESSIONS_COLLECTION = 'doctorSessions';
+const DOCTOR_CONTENT_COLLECTION = 'doctorContent';
 
 // ─── Session types ────────────────────────────────────────────────────────────
 
@@ -74,6 +75,28 @@ export interface DoctorSession {
   duration: string;       // e.g. "30 Minutes"
   isPaid: boolean;
   approvalStatus: SessionApprovalStatus;
+  rejectionReason?: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+// ─── Content types ────────────────────────────────────────────────────────────
+
+export type ContentApprovalStatus = 'draft' | 'pending_approval' | 'approved' | 'rejected';
+export type ContentType = 'article' | 'video';
+
+export interface DoctorContent {
+  id?: string;
+  doctorId: string;
+  doctorName: string;
+  contentType: ContentType;
+  title: string;
+  content: string;        // Markdown for articles, description for videos
+  category: string;
+  tags: string[];
+  thumbnailUrl?: string;
+  videoUrl?: string;      // Only for video type
+  approvalStatus: ContentApprovalStatus;
   rejectionReason?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -167,6 +190,98 @@ export const rejectSession = async (sessionId: string, reason?: string): Promise
     });
   } catch (error) {
     console.error('Error rejecting session:', error);
+    throw error;
+  }
+};
+
+// ─── Content CRUD ─────────────────────────────────────────────────────────────
+
+export const createDoctorContent = async (
+  contentData: Omit<DoctorContent, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<string> => {
+  try {
+    const now = Timestamp.now();
+    const docRef = await addDoc(collection(db, DOCTOR_CONTENT_COLLECTION), {
+      ...contentData,
+      createdAt: now,
+      updatedAt: now,
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating doctor content:', error);
+    throw error;
+  }
+};
+
+export const getDoctorContent = async (doctorId: string): Promise<DoctorContent[]> => {
+  try {
+    const q = query(
+      collection(db, DOCTOR_CONTENT_COLLECTION),
+      where('doctorId', '==', doctorId),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as DoctorContent[];
+  } catch (error) {
+    console.error('Error getting doctor content:', error);
+    throw error;
+  }
+};
+
+// Used by the user-facing app — only returns approved content
+export const getApprovedContent = async (): Promise<DoctorContent[]> => {
+  try {
+    const q = query(
+      collection(db, DOCTOR_CONTENT_COLLECTION),
+      where('approvalStatus', '==', 'approved'),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as DoctorContent[];
+  } catch (error) {
+    console.error('Error getting approved content:', error);
+    throw error;
+  }
+};
+
+// Used by the super-admin panel — returns all pending content
+export const getPendingContentForAdmin = async (): Promise<DoctorContent[]> => {
+  try {
+    const q = query(
+      collection(db, DOCTOR_CONTENT_COLLECTION),
+      where('approvalStatus', '==', 'pending_approval'),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as DoctorContent[];
+  } catch (error) {
+    console.error('Error getting pending content:', error);
+    throw error;
+  }
+};
+
+// Super-admin approves content
+export const approveContent = async (contentId: string): Promise<void> => {
+  try {
+    const ref = doc(db, DOCTOR_CONTENT_COLLECTION, contentId);
+    await updateDoc(ref, { approvalStatus: 'approved', updatedAt: Timestamp.now() });
+  } catch (error) {
+    console.error('Error approving content:', error);
+    throw error;
+  }
+};
+
+// Super-admin rejects content
+export const rejectContent = async (contentId: string, reason?: string): Promise<void> => {
+  try {
+    const ref = doc(db, DOCTOR_CONTENT_COLLECTION, contentId);
+    await updateDoc(ref, {
+      approvalStatus: 'rejected',
+      rejectionReason: reason ?? '',
+      updatedAt: Timestamp.now(),
+    });
+  } catch (error) {
+    console.error('Error rejecting content:', error);
     throw error;
   }
 };
