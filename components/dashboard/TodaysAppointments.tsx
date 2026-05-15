@@ -30,12 +30,18 @@ export default function TodaysAppointments({ appointments, loading }: TodaysAppo
     return 'CONSULTATION';
   };
 
+  const today = new Date().toLocaleDateString('en-US', { 
+    month: 'long', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Today's Appointments</h3>
-          <p className="text-gray-500 dark:text-gray-400">March 24, 2024</p>
+          <p className="text-gray-500 dark:text-gray-400">{today}</p>
         </div>
         <button className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
           View All

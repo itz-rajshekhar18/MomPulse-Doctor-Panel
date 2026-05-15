@@ -128,8 +128,8 @@ export default function DashboardPage() {
               {/* Right Column - Earnings & Workshops */}
               <div className="space-y-8">
                 <MonthlyEarnings
-                  earnings={14280}
-                  percentageChange={12.5}
+                  earnings={0}
+                  percentageChange={0}
                 />
                 <UpcomingWorkshops workshops={[]} />
               </div>

@@ -19,18 +19,7 @@ const ArticleIcon = () => (
 );
 
 export default function ArticleSubmissions({ articles, onEdit, onView }: ArticleSubmissionsProps) {
-  const defaultArticles: ArticleSubmission[] = [
-    {
-      id: '1',
-      title: 'Nutrition in Trimester 3',
-      status: 'needs-review',
-    },
-    {
-      id: '2',
-      title: 'Sleep Training Guide',
-      status: 'published',
-    }
-  ];
+  const defaultArticles: ArticleSubmission[] = [];
 
   const displayArticles = articles.length > 0 ? articles : defaultArticles;
 
@@ -74,7 +63,15 @@ export default function ArticleSubmissions({ articles, onEdit, onView }: Article
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Article Submissions</h3>
 
-      <div className="space-y-4">
+      {displayArticles.length === 0 ? (
+        <div className="text-center py-8">
+          <svg className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p className="text-gray-500 dark:text-gray-400">No article submissions</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
         {displayArticles.map((article) => (
           <div
             key={article.id}
@@ -122,6 +119,7 @@ export default function ArticleSubmissions({ articles, onEdit, onView }: Article
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

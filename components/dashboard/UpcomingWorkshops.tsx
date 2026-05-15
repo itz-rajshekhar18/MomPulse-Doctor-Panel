@@ -28,14 +28,22 @@ export default function UpcomingWorkshops({ workshops }: UpcomingWorkshopsProps)
   ];
 
   const displayWorkshops = workshops.length > 0 ? workshops : defaultWorkshops;
+  const totalRegistered = displayWorkshops.reduce((sum, w) => sum + w.registeredCount, 0);
+  const workshopCount = displayWorkshops.length;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Upcoming Workshops</h3>
       
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
-        You have 2 group wellness sessions scheduled for this weekend. 45 moms have already registered.
-      </p>
+      {workshopCount > 0 ? (
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          You have {workshopCount} group wellness session{workshopCount !== 1 ? 's' : ''} scheduled. {totalRegistered} participant{totalRegistered !== 1 ? 's have' : ' has'} registered.
+        </p>
+      ) : (
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          No upcoming workshops scheduled.
+        </p>
+      )}
 
       {/* Workshop participants avatars */}
       <div className="flex items-center gap-3 mb-6">

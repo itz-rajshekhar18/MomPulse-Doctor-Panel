@@ -15,22 +15,7 @@ interface SessionApprovalsProps {
 }
 
 export default function SessionApprovals({ sessions, onApprove, onReject }: SessionApprovalsProps) {
-  const defaultSessions: SessionApproval[] = [
-    {
-      id: '1',
-      title: 'Postnatal Yoga Core',
-      proposedBy: 'Coach Maria',
-      date: 'Oct 12',
-      status: 'pending'
-    },
-    {
-      id: '2',
-      title: 'Infant First Aid basics',
-      proposedBy: 'Nurse Kelly',
-      date: 'Oct 15',
-      status: 'pending'
-    }
-  ];
+  const defaultSessions: SessionApproval[] = [];
 
   const displaySessions = sessions.length > 0 ? sessions : defaultSessions;
 
@@ -38,7 +23,15 @@ export default function SessionApprovals({ sessions, onApprove, onReject }: Sess
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Session Approvals</h3>
 
-      <div className="space-y-4">
+      {displaySessions.length === 0 ? (
+        <div className="text-center py-8">
+          <svg className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-gray-500 dark:text-gray-400">No pending session approvals</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
         {displaySessions.map((session) => (
           <div key={session.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
             <div className="flex items-center gap-4 flex-1">
@@ -80,6 +73,7 @@ export default function SessionApprovals({ sessions, onApprove, onReject }: Sess
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }
