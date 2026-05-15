@@ -16,16 +16,6 @@ service cloud.firestore {
       return isAuthenticated() && (request.auth.token.email == 'admin@admin.com' || request.auth.token.email == 'admin@mompulse.com');
     }
 
-    // Helper function to check if user is a doctor
-    function isDoctor() {
-      return isAuthenticated() && exists(/databases/$(database)/documents/doctors/$(request.auth.uid));
-    }
-
-    // Helper function to get doctor data
-    function getDoctorData() {
-      return get(/databases/$(database)/documents/doctors/$(request.auth.uid)).data;
-    }
-
     // Users collection - users can only read/write their own data, admins can read all
     match /users/{userId} {
       // Admins have full access
@@ -316,7 +306,6 @@ service cloud.firestore {
       // Doctors can create sessions and assign them to themselves
       allow create: if isAuthenticated() &&
         request.resource.data.doctorId == request.auth.uid &&
-        exists(/databases/$(database)/documents/doctors/$(request.auth.uid)) &&
         request.resource.data.approvalStatus in ['draft', 'pending_approval'];
 
       // Doctors can update only their own sessions, and cannot self-approve
