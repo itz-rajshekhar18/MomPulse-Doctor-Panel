@@ -52,7 +52,7 @@ export default function WriterPage() {
       content: content.trim(),
       category,
       tags,
-      approvalStatus: status as const,
+      approvalStatus: status,
     };
 
     // Only add videoUrl if it's a video and has a value

@@ -48,19 +48,21 @@ export default function ScheduleSessionPage() {
     return null;
   };
 
-  const buildPayload = (status: 'draft' | 'pending_approval') => ({
-    doctorId: user!.uid,
-    doctorName: doctor?.name ?? user!.email ?? 'Unknown Doctor',
-    title: title.trim(),
-    description: description.trim(),
-    sessionType,
-    maxParticipants: parseInt(maxParticipants, 10) || 10,
-    date,
-    startTime,
-    duration,
-    isPaid,
-    approvalStatus: status as const,
-  });
+  const buildPayload = (status: 'draft' | 'pending_approval') => {
+    return {
+      doctorId: user!.uid,
+      doctorName: doctor?.name ?? user!.email ?? 'Unknown Doctor',
+      title: title.trim(),
+      description: description.trim(),
+      sessionType,
+      maxParticipants: parseInt(maxParticipants, 10) || 10,
+      date,
+      startTime,
+      duration,
+      isPaid,
+      approvalStatus: status,
+    };
+  };
 
   const handleSaveAsDraft = async () => {
     const err = validate();
