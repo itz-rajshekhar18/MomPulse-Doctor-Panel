@@ -231,13 +231,9 @@ service cloud.firestore {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can read and write patients assigned to them
-      allow read, write: if isAuthenticated() && 
-        exists(/databases/$(database)/documents/doctors/$(resource.data.doctorId)) &&
-        resource.data.doctorId == request.auth.uid;
+      allow read, write: if isAuthenticated() && resource.data.doctorId == request.auth.uid;
       // Doctors can create patients and assign them to themselves
-      allow create: if isAuthenticated() && 
-        request.resource.data.doctorId == request.auth.uid &&
-        exists(/databases/$(database)/documents/doctors/$(request.auth.uid));
+      allow create: if isAuthenticated() && request.resource.data.doctorId == request.auth.uid;
     }
 
     // Doctor Panel - Appointments collection
@@ -245,13 +241,9 @@ service cloud.firestore {
       // Admins have full access
       allow read, write: if isAdmin();
       // Doctors can read and write appointments for their patients
-      allow read, write: if isAuthenticated() && 
-        exists(/databases/$(database)/documents/doctors/$(resource.data.doctorId)) &&
-        resource.data.doctorId == request.auth.uid;
+      allow read, write: if isAuthenticated() && resource.data.doctorId == request.auth.uid;
       // Doctors can create appointments for their patients
-      allow create: if isAuthenticated() && 
-        request.resource.data.doctorId == request.auth.uid &&
-        exists(/databases/$(database)/documents/doctors/$(request.auth.uid));
+      allow create: if isAuthenticated() && request.resource.data.doctorId == request.auth.uid;
     }
 
     // Doctor Panel - Medical Records subcollection
