@@ -55,6 +55,121 @@ export interface Appointment {
 const DOCTORS_COLLECTION = 'doctors';
 const PATIENTS_COLLECTION = 'patients';
 const APPOINTMENTS_COLLECTION = 'appointments';
+const DOCTOR_SESSIONS_COLLECTION = 'doctorSessions';
+
+// ─── Session types ────────────────────────────────────────────────────────────
+
+export type SessionApprovalStatus = 'draft' | 'pending_approval' | 'approved' | 'rejected';
+
+export interface DoctorSession {
+  id?: string;
+  doctorId: string;
+  doctorName: string;
+  title: string;
+  description: string;
+  sessionType: string;
+  maxParticipants: number;
+  date: string;           // ISO date string  e.g. "2026-05-20"
+  startTime: string;      // "HH:MM"
+  duration: string;       // e.g. "30 Minutes"
+  isPaid: boolean;
+  approvalStatus: SessionApprovalStatus;
+  rejectionReason?: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+// ─── Session CRUD ─────────────────────────────────────────────────────────────
+
+export const createDoctorSession = async (
+  sessionData: Omit<DoctorSession, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<string> => {
+  try {
+    const now = Timestamp.now();
+    const docRef = await addDoc(collection(db, DOCTOR_SESSIONS_COLLECTION), {
+      ...sessionData,
+      createdAt: now,
+      updatedAt: now,
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating doctor session:', error);
+    throw error;
+  }
+};
+
+export const getDoctorSessions = async (doctorId: string): Promise<DoctorSession[]> => {
+  try {
+    const q = query(
+      collection(db, DOCTOR_SESSIONS_COLLECTION),
+      where('doctorId', '==', doctorId),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as DoctorSession[];
+  } catch (error) {
+    console.error('Error getting doctor sessions:', error);
+    throw error;
+  }
+};
+
+// Used by the user-facing app — only returns approved sessions
+export const getApprovedSessions = async (): Promise<DoctorSession[]> => {
+  try {
+    const q = query(
+      collection(db, DOCTOR_SESSIONS_COLLECTION),
+      where('approvalStatus', '==', 'approved'),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as DoctorSession[];
+  } catch (error) {
+    console.error('Error getting approved sessions:', error);
+    throw error;
+  }
+};
+
+// Used by the super-admin panel — returns all pending sessions
+export const getPendingSessionsForAdmin = async (): Promise<DoctorSession[]> => {
+  try {
+    const q = query(
+      collection(db, DOCTOR_SESSIONS_COLLECTION),
+      where('approvalStatus', '==', 'pending_approval'),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as DoctorSession[];
+  } catch (error) {
+    console.error('Error getting pending sessions:', error);
+    throw error;
+  }
+};
+
+// Super-admin approves a session
+export const approveSession = async (sessionId: string): Promise<void> => {
+  try {
+    const ref = doc(db, DOCTOR_SESSIONS_COLLECTION, sessionId);
+    await updateDoc(ref, { approvalStatus: 'approved', updatedAt: Timestamp.now() });
+  } catch (error) {
+    console.error('Error approving session:', error);
+    throw error;
+  }
+};
+
+// Super-admin rejects a session
+export const rejectSession = async (sessionId: string, reason?: string): Promise<void> => {
+  try {
+    const ref = doc(db, DOCTOR_SESSIONS_COLLECTION, sessionId);
+    await updateDoc(ref, {
+      approvalStatus: 'rejected',
+      rejectionReason: reason ?? '',
+      updatedAt: Timestamp.now(),
+    });
+  } catch (error) {
+    console.error('Error rejecting session:', error);
+    throw error;
+  }
+};
 
 // Doctor operations
 export const getDoctorByEmail = async (email: string): Promise<Doctor | null> => {
