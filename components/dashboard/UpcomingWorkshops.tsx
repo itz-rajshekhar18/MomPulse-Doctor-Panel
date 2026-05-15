@@ -17,13 +17,13 @@ export default function UpcomingWorkshops({ workshops }: UpcomingWorkshopsProps)
       id: '1',
       title: 'Prenatal Wellness Workshop',
       registeredCount: 45,
-      image: '/workshop-1.jpg'
+      image: ''
     },
     {
       id: '2',
       title: 'Postpartum Recovery Session',
       registeredCount: 32,
-      image: '/workshop-2.jpg'
+      image: ''
     }
   ];
 
